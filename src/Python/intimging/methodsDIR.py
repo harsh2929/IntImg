@@ -1,3 +1,11 @@
+'''
+
+
+
+
+
+
+
 
 
 import numpy as np
@@ -7,13 +15,7 @@ from intimg.supp.astraOP import parse_device_argument
 import scipy.fftpack
 
 def filtersinc3D(projection3D):
-    # applies filters to __3D projection data__ in order to achieve FBP
-    # Data format [DetectorVert, Projections, DetectorHoriz]
-    # adopted from Matlabs code by  Waqas Akram
-    #"a":	This parameter varies the filter magnitude response.
-    #When "a" is very small (a<<1), the response approximates |w|
-    #As "a" is increased, the filter response starts to
-    #roll off at high frequencies.
+    
     a = 1.1
     [DetectorsLengthV, projectionsNum, DetectorsLengthH] = np.shape(projection3D)
     w = np.linspace(-np.pi,np.pi-(2*np.pi)/DetectorsLengthH, DetectorsLengthH,dtype='float32')
@@ -154,16 +156,7 @@ class RecToolsDIR:
         # Fourier transform the rows of the sinogram, move the DC component to the row's centre
         sinogram_fft_rows=scipy.fftpack.fftshift(scipy.fftpack.fft(scipy.fftpack.ifftshift(sinogram,axes=1)),axes=1)
 
-        """
-        V  = 100
-        plt.figure()
-        plt.subplot(121)
-        plt.title("Sinogram rows FFT (real)")
-        plt.imshow(np.real(sinogram_fft_rows),vmin=-V,vmax=V)
-        plt.subplot(122)
-        plt.title("Sinogram rows FFT (imag)")
-        plt.imshow(np.imag(sinogram_fft_rows),vmin=-V,vmax=V)
-        """
+
         # Coordinates of sinogram FFT-ed rows' samples in 2D FFT space
         a = -self.AnglesVec
         r=np.arange(self.DetectorsDimH) - self.DetectorsDimH/2
@@ -186,28 +179,7 @@ class RecToolsDIR:
         """
         # Interpolate the 2D Fourier space grid from the transformed sinogram rows
         fft2=scipy.interpolate.griddata((srcy,srcx), sinogram_fft_rows.flatten(), (dsty,dstx), method, fill_value=0.0).reshape((self.DetectorsDimH,self.DetectorsDimH))
-        """
-        plt.figure()
-        plt.suptitle("FFT2 space")
-        plt.subplot(221)
-        plt.title("Recon (real)")
-        plt.imshow(np.real(fft2),vmin=-V,vmax=V)
-        plt.subplot(222)
-        plt.title("Recon (imag)")
-        plt.imshow(np.imag(fft2),vmin=-V,vmax=V)
-        """
 
-        """
-        # Show 2D FFT of target, just for comparison
-        expected_fft2=scipy.fftpack.fftshift(scipy.fftpack.fft2(scipy.fftpack.ifftshift(phantom_2D)))
-
-        plt.subplot(223)
-        plt.title("Expected (real)")
-        plt.imshow(np.real(expected_fft2),vmin=-V,vmax=V)
-        plt.subplot(224)
-        plt.title("Expected (imag)")
-        plt.imshow(np.imag(expected_fft2),vmin=-V,vmax=V)
-        """
         # Transform from 2D Fourier space back to a reconstruction of the target
         recon=np.real(scipy.fftpack.fftshift(scipy.fftpack.ifft2(scipy.fftpack.ifftshift(fft2))))
 
